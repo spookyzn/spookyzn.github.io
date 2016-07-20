@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="devops技术博客及其他">
+    <meta name="keyword"  content="undefined">
+    <link rel="shortcut icon" href="/img/coffee.png">
+
+    <title>
+        
+          Eudemon 监控框架介绍｜归零者的小屋
+        
+    </title>
+
+    <link rel="canonical" href="http://spookyzn.github.io/2016/07/20/eudemon/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/blog-style.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<style>
+    .intro-header{
+        background-image:url(
+        'http://oalj1k7ay.bkt.clouddn.com/-mac-os-x-hd-apple-1920x1080-412136-mac-os-x.jpg?imageView2/1/w/1400/h/400/interlace/1/q/90'
+        )
+    }
+</style>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top " data-ispost = "true" data-istags="false
+" data-ishome = "false" >
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <span class="brand-logo">
+                    归零者的小屋
+                </span>
+                000
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <!-- /.navbar-collapse -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+                        
+                        <li>
+                            <a href="/archives/">archives</a>
+                        </li>
+                        
+                    
+                        
+                        <li>
+                            <a href="/about/">about</a>
+                        </li>
+                        
+                    
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!--only post-->
+<img class="wechat-title-img" src="http://oalj1k7ay.bkt.clouddn.com/-mac-os-x-hd-apple-1920x1080-412136-mac-os-x.jpg?imageView2/1/w/1400/h/400/interlace/1/q/90">
+
+<!-- Post Header -->
+<!-- only post bg-->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('http://oalj1k7ay.bkt.clouddn.com/-mac-os-x-hd-apple-1920x1080-412136-mac-os-x.jpg?imageView2/1/w/1400/h/400/interlace/1/q/90')
+    }
+</style>
+
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
+                <div class="post-heading">
+                    <h1>Eudemon 监控框架介绍</h1>
+                    
+                    <span class="meta">
+                         作者 Ken Zhu
+                         <span>
+                          日期 2016-07-20
+                         </span>
+                    </span>
+                    <div class="tags text-center">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="post-title-haojen">
+        <span>
+            Eudemon 监控框架介绍
+        </span>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+                <!-- Post Container -->
+            <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
+
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Eudemon 是为了实现运维监控case中的数据收集，存储，展现和报警常用基础功能，整合nagios, graphite，grafana等开源工具开发而成的一套监控框架。框架中，nagios作为系统核心提供数据收集和报警； graphite作为存储业务数据以及展现的工具；并使用django框架开发了一套admin配置界面可以对系统进行管理和配置。</p>
+<p>该框架目前适用于如下监控场景:</p>
+<ul>
+<li>针对ES数据的监控和报警</li>
+<li>针对Opentsbd数据的监控和报警</li>
+<li>其他主动式监控场景</li>
+</ul>
+<p>同时为了适应在数据监控任务中采集数据源众多，报警规则复杂，阈值设置需求多的特点；框架支持使用类python的DSL定义报警逻辑，描述判断条件简单方便，格式整齐易读；同时支持使用service对象支持宏预定义报警阈值，使报警阈值设定更灵活方便。 </p>
+<p>开发该框架的目的是减少监控业务数据case中的不必要的重复劳动，提供一套可通过admin配置界面高度定制化的通用监控平台。 从而让每个运维开发的生活更美好，家庭更幸福。</p>
+<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
+<li>数据收集器可配置，并可按需求添加新的collector</li>
+<li>报警逻辑由定制DSL语言来定义， 并支持扩展；报警阈值使用宏来预定义，更好的支持用户自定义阈值功能</li>
+<li>Event Handler功能；可对事件进行捕捉，并定义相应处理逻辑</li>
+<li>admin 配置界面，可对Service, Trigger, Notification等模块做配置</li>
+<li>支持多种报警方式，邮件，短信， graphite event，并可扩展用户自定义方式</li>
+<li>报警信息支持django template模板语言，可以分别定义邮件，短信等不同报警方式的消息内容</li>
+<li>所见即所得的dashboard配置和展现</li>
+</ul>
+<h3 id="自定义Collector"><a href="#自定义Collector" class="headerlink" title="自定义Collector"></a>自定义Collector</h3><p>通过后台配置，调用相应的python函数，并在配置中传入参数；可以让用户自定义collector收集器，一次编写多次使用，减少重复编码。<br><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_collector.png" alt="collector"></p>
+<h3 id="DSL定义报警规则，宏预定义报警阈值"><a href="#DSL定义报警规则，宏预定义报警阈值" class="headerlink" title="DSL定义报警规则，宏预定义报警阈值"></a>DSL定义报警规则，宏预定义报警阈值</h3><p>独创使用类python的DSL定义报警逻辑，描述判断条件简单方便，格式整齐易读；同时支持使用service对象支持宏预定义报警阈值，使报警阈值设定更灵活方便；DSL支持用户定制，功能可无限扩展。</p>
+<p>DSL定义报警逻辑</p>
+<p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_dsl.png" alt="dsl"></p>
+<p>预定义宏为阈值</p>
+<p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_threshold_setting.png" alt="threshold"></p>
+<h3 id="多种报警方式"><a href="#多种报警方式" class="headerlink" title="多种报警方式"></a>多种报警方式</h3><p>框架默认支持邮件，短信，graphite event方式，但框架可以十分方便的扩展用户自定义的通知方式；比如把报警通过web service接口发送至一个报警追踪展示平台。</p>
+<p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_notification_entry.png" alt="notification"></p>
+<h3 id="报警消息自定义"><a href="#报警消息自定义" class="headerlink" title="报警消息自定义"></a>报警消息自定义</h3><p>报警消息体为不同报警方式提供多种类型，适用于邮件的详细文本字段，适用于短信的简短格式，或者是使用于event的tip格式。同时这些消息体支持django template模板语言，更加灵活定义报警消息。</p>
+<p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_notification_content.png" alt="content"></p>
+<h3 id="数据dashboard展现"><a href="#数据dashboard展现" class="headerlink" title="数据dashboard展现"></a>数据dashboard展现</h3><p>通过grafana图形化配置界面，方便的从graphite中选取metric数据，并配置展现方式，这种所见即所得的配置方式比普通方式更直观更方便。</p>
+<p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_grafana.png" alt="grafana"></p>
+<h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_class.png" alt="eudemon class"></p>
+<p>eudemon 模型中重要的是3个对象，Services, Triggers, Notification；</p>
+<h3 id="Services"><a href="#Services" class="headerlink" title="Services"></a>Services</h3><p>该对象可以看做是Nagios中的Service对象，该对象中的很多属性是和Nagios Service对象相对应；对象的collecor属性是一个指向Command对象的外键，所有command对象中类型为collector的命令都可以当做收集器使用；同时该对象和Event Handler对象是为1对n关系，所有该Service产生的事件都由指定的Event Handler来处理，command中类型为event handler的命令都可用来处理事件。</p>
+<h3 id="Triggers"><a href="#Triggers" class="headerlink" title="Triggers"></a>Triggers</h3><p>Trigger对象在Nagios模型中没有对应的对象，该对象是由zabbix模型借用而来；把services和triggers的多对多关系是为了对应两种不同的实际情况</p>
+<ul>
+<li>多个service对应一个trigger；这种形式比较普遍，多个监控点的判断逻辑是一致的，所以共用一个trigger，报警判断逻辑由trigger对象中的DSL来定义；实际case中，报警逻辑一致，但阈值因service而已，这时DSL中的判断阈值可以使用在service对象中的预定义宏变量。</li>
+<li>一个service对应多个trigger；同一个数据，需要多种不同判断逻辑，多个判断逻辑间为或运算，只要触发一个trigger，该service就触发相应报警。</li>
+</ul>
+<h3 id="Notification"><a href="#Notification" class="headerlink" title="Notification"></a>Notification</h3><p>notification对象是用来处理service的notification事件，该对象与notification entry为1对n关系，按severity来选择对应的报警通知方式</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>两种比较特殊的service和trigger配置：</p>
+<ul>
+<li>service设置collector，但trigger为空；这种情况可把监控点看做是一个单纯的数据收集器，只收集数据但对数据不做逻辑判断；比如可以配置这种收集器来批量收集数据，并写入graphite或者其他数据存储。</li>
+<li>service设置为空，设置了trigger；这种情况可把监控点看做是一个判定脚本，只运行逻辑规则判定数据是否报警但不收集数据；比如针对ES, Opentsdb这样的监控点，通过直接调用系统接口读取数据做判断，而无需收集相应数据</li>
+</ul>
+<p>结合以上两种特殊配置的监控点，可以很好利用第一种监控点来从其他系统批量收集数据并写入后台graphite，同时利用第二种监控点来判断收集回本地的数据。</p>
+<p><code>框架中service和trigger为空，有专门名称为dummy的记录来对应</code></p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p><img src="http://oalj1k7ay.bkt.clouddn.com/eudemon_intro_arch.png" alt="eudeemon arch"></p>
+<h3 id="Nagios"><a href="#Nagios" class="headerlink" title="Nagios"></a>Nagios</h3><p>nagios是系统核心，eudemon使用nagios core 4.0作为核心组件，负责监控进程的后台调度，event事件捕获，提供notification机制。</p>
+<h3 id="Collector-amp-DSL"><a href="#Collector-amp-DSL" class="headerlink" title="Collector &amp; DSL"></a>Collector &amp; DSL</h3><p>collector &amp; DSL 在系统中分别负责数据的收集和报警规则的判断；在系统模型中，collector在Service对象中定义，DSL在trigger对象中定义；可以把Collector和DSL组合成一个nagios service check，collector中定义的是如何收集数据，而DSL中定义如何报警的逻辑。DSL中有预定义的一些常用参数，比如周环比，自定义时间的同比等；这些函数都是通过graphite api 读取graphite数据来实现，有的DSL函数是直接通过映射graphite api来实现。</p>
+<h3 id="Graphios"><a href="#Graphios" class="headerlink" title="Graphios"></a>Graphios</h3><p>该组件的功能是读取nagios的service performance信息，通过carbon服务把performance data写入graphite。</p>
+<h3 id="Dashboard"><a href="#Dashboard" class="headerlink" title="Dashboard"></a>Dashboard</h3><p>该系统的dashboard是基于grafana二次开发，增加了一些实用功能；比如，保存每个screen的配置信息至数据库。</p>
+<h3 id="Mysql"><a href="#Mysql" class="headerlink" title="Mysql"></a>Mysql</h3><p>mysql作为整个系统的配置信息存储，包括Service, Trigger等对象的配置信息，dashboard的screen和menu配置信息。</p>
+<h2 id="代码库"><a href="#代码库" class="headerlink" title="代码库"></a>代码库</h2><p><a href="https://coding.net/u/spookyzn/p/Eudemon/git" target="_blank" rel="external">https://coding.net/u/spookyzn/p/Eudemon/git</a></p>
+<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2>
+
+                <hr>
+
+                
+                <!-- 多说 Share start -->
+                <div class="ds-share"
+                    style="text-align: right"
+                    data-thread-key="2016/07/20/eudemon/"
+                    data-title="Eudemon 监控框架介绍"
+                    data-url="http://spookyzn.github.io/2016/07/20/eudemon/"
+                    data-images=""
+                    data-content="简介Eudemon 是为了实现运维监控case中的数据收集，存储，展现和报警常用基础功能，整合... | 归零者的小屋 " >
+                    <div class="ds-share-inline">
+                      <ul  class="ds-share-icons-16">
+                        <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                        <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                        <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                        <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                      </ul>
+                      <div class="ds-share-icons-more">
+                      </div>
+                    </div>
+                <hr>
+                </div>
+                <!-- 多说 Share end-->
+                
+
+                <ul class="pager">
+                    
+                    
+                        <li class="next">
+                            <a href="/2016/07/20/hello-world/" data-toggle="tooltip" data-placement="top" title="Hello World">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="2016/07/20/eudemon/"
+                        data-title="Eudemon 监控框架介绍"
+                        data-url="http://spookyzn.github.io/2016/07/20/eudemon/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+            <div class="hidden-xs col-sm-3 toc-col" >
+                <div class="toc-wrap">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#简介"><span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#功能"><span class="toc-text">功能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义Collector"><span class="toc-text">自定义Collector</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DSL定义报警规则，宏预定义报警阈值"><span class="toc-text">DSL定义报警规则，宏预定义报警阈值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多种报警方式"><span class="toc-text">多种报警方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#报警消息自定义"><span class="toc-text">报警消息自定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据dashboard展现"><span class="toc-text">数据dashboard展现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#模型"><span class="toc-text">模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Services"><span class="toc-text">Services</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Triggers"><span class="toc-text">Triggers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Notification"><span class="toc-text">Notification</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#架构"><span class="toc-text">架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Nagios"><span class="toc-text">Nagios</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Collector-amp-DSL"><span class="toc-text">Collector & DSL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Graphios"><span class="toc-text">Graphios</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dashboard"><span class="toc-text">Dashboard</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mysql"><span class="toc-text">Mysql</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码库"><span class="toc-text">代码库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文档"><span class="toc-text">文档</span></a></li></ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                <h5 class="text-center">
+                    <a href="/tags/">FEATURED TAGS</a>
+                </h5>
+                    <div class="tags">
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'spookyzn';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/spookyzn">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 归零者的小屋 2016 
+                    <br>
+                    Theme -  <a href="https://github.com/Haojen/hexo-theme-Anisina">Anisina</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/blog.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://spookyzn.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Side Catalog -->
+
+
+    <!--wechat title img-->
+    <img class="wechat-title-img" src="http://oalj1k7ay.bkt.clouddn.com/1091865.jpeg?imageView2/2/w/300/h/300/interlace/1/q/90">
+</body>
+
+</html>
