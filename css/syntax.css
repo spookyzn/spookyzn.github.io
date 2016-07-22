@@ -150,3 +150,107 @@ pre .deletion {
 .gutter {
   width: 70px;
 }
+.archives-wrap {
+  margin: block-margin 0;
+}
+.archive-year-wrap {
+  margin-bottom: 1em;
+}
+.archive-year {
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: color-grey;
+  margin-bottom: 1em;
+  margin-left: 5px;
+  line-height: 1em;
+  text-shadow: 0 1px #fff;
+  font-weight: bold;
+}
+.archives {
+  column-gap: 10px;
+}
+@media mq-tablet {
+  .archives {
+    column-count: 2;
+  }
+}
+@media mq-normal {
+  .archives {
+    column-count: 3;
+  }
+}
+.archive-article-inner {
+  background: #fff;
+  box-shadow: 1px 2px 3px #ddd;
+  border: 1px solid color-border;
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+.archive-article-title {
+  text-decoration: none;
+  font-weight: bold;
+  color: color-default;
+  transition: color 0.2s;
+  line-height: line-height;
+}
+.archive-article-title:hover {
+  color: color-link;
+}
+.archive-article-footer {
+  margin-top: 1em;
+}
+.archive-article-date {
+  color: color-grey;
+  text-decoration: none;
+  font-size: 0.85em;
+  line-height: 1em;
+  margin-bottom: 0.5em;
+  display: block;
+}
+#page-nav {
+  margin: block-margin auto;
+  background: #fff;
+  box-shadow: 1px 2px 3px #ddd;
+  border: 1px solid color-border;
+  border-radius: 3px;
+  text-align: center;
+  color: color-grey;
+  overflow: hidden;
+}
+#page-nav a,
+#page-nav span {
+  padding: 10px 20px;
+  line-height: 1;
+  height: 2ex;
+}
+#page-nav a {
+  color: color-grey;
+  text-decoration: none;
+}
+#page-nav a:hover {
+  background: color-grey;
+  color: #fff;
+}
+#page-nav .prev {
+  float: left;
+}
+#page-nav .next {
+  float: right;
+}
+#page-nav .page-number {
+  display: inline-block;
+}
+@media mq-mobile {
+  #page-nav .page-number {
+    display: none;
+  }
+}
+#page-nav .current {
+  color: color-default;
+  font-weight: bold;
+}
+#page-nav .space {
+  color: color-border;
+}
