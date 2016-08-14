@@ -12,11 +12,11 @@
 
     <title>
         
-          Hello World｜归零者的小屋
+          Mac osx下Docker-machine 配置internal registry｜归零者的小屋
         
     </title>
 
-    <link rel="canonical" href="http://spookyzn.github.io/2016/07/20/hello-world/">
+    <link rel="canonical" href="http://spookyzn.github.io/2016/08/14/docker-machine-internal-registry/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -159,15 +159,19 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 text-center">
                 <div class="post-heading">
-                    <h1>Hello World</h1>
+                    <h1>Mac osx下Docker-machine 配置internal registry</h1>
                     
                     <span class="meta">
                          作者 Ken Zhu
                          <span>
-                          日期 2016-07-20
+                          日期 2016-08-14
                          </span>
                     </span>
                     <div class="tags text-center">
+                        
+                        <a class="tag" href="/tags/#docker" title="docker">docker</a>
+                        
+                        <a class="tag" href="/tags/#osx" title="osx">osx</a>
                         
                     </div>
                 </div>
@@ -176,7 +180,7 @@
     </div>
     <div class="post-title-haojen">
         <span>
-            Hello World
+            Mac osx下Docker-machine 配置internal registry
         </span>
     </div>
 </header>
@@ -188,16 +192,21 @@
                 <!-- Post Container -->
             <div class="col-lg-8 col-lg-offset-1 col-sm-9 post-container">
 
-                <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
+                <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>使用Mac开发时，有时需要搭建环境，这时使用docker就十分方便；直接docker pull从docker registry中拉取镜像即可；但如果公司中有建立内部internal registry，如何才能使用docker push命令把自己编辑的镜像上传？</p>
+<p>本人使用的是docker-machine version 0.7.0, build a650a40版本；之前通过登录docker虚拟机，修改docker daemon启动参数来实现；但该方法不能持久化，每次重启后，需要反复设置才能生效；通过google后，并查阅文档，总算找到了解决方案。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ul>
+<li>找到~/.docker/machine/machines/default/config.json</li>
+</ul>
+<figure class="highlight prolog"><table><tr><td class="code"><pre><div class="line"><span class="string">"InsecureRegistry"</span>: [</div><div class="line">      <span class="string">"hub.cloud.ctripcorp.com"</span></div><div class="line">],</div><div class="line"></div><div class="line"><span class="string">"RegistryMirror"</span>: [</div><div class="line">    <span class="string">"http://hub.cloud.ctripcorp.com"</span></div><div class="line">],</div></pre></td></tr></table></figure>
+<ul>
+<li>执行命令，生效配置</li>
+</ul>
+<figure class="highlight haskell"><table><tr><td class="code"><pre><div class="line">$ docker-machine provision <span class="keyword">default</span></div><div class="line">`</div></pre></td></tr></table></figure>
+<p>注：provision命令只有高版本docker-machine才支持；0.5版本就没有这个命令</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><ul>
+<li>如何把docker官方拉取的image push至内部register </li>
+</ul>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><div class="line">使用docker tag</div><div class="line">docker tag [<span class="string">OPTIONS</span>] IMAGE[<span class="string">:TAG</span>] [<span class="string">REGISTRYHOST/</span>][<span class="symbol">USERNAME/</span>]NAME[:TAG]</div><div class="line">命名成</div><div class="line"><span class="xml"><span class="tag">&lt;<span class="name">internal</span> <span class="attr">registry</span>&gt;</span></span>/buildpack-deps   jessie-scm</div></pre></td></tr></table></figure>
 
                 <hr>
 
@@ -205,11 +214,11 @@
                 <!-- 多说 Share start -->
                 <div class="ds-share"
                     style="text-align: right"
-                    data-thread-key="2016/07/20/hello-world/"
-                    data-title="Hello World"
-                    data-url="http://spookyzn.github.io/2016/07/20/hello-world/"
+                    data-thread-key="2016/08/14/docker-machine-internal-registry/"
+                    data-title="Mac osx下Docker-machine 配置internal registry"
+                    data-url="http://spookyzn.github.io/2016/08/14/docker-machine-internal-registry/"
                     data-images=""
-                    data-content="Welcome to Hexo! This is your very first post. ... | 归零者的小屋 " >
+                    data-content="问题使用Mac开发时，有时需要搭建环境，这时使用docker就十分方便；直接docker pu... | 归零者的小屋 " >
                     <div class="ds-share-inline">
                       <ul  class="ds-share-icons-16">
                         <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
@@ -227,10 +236,10 @@
 
                 <ul class="pager">
                     
-                        <li class="previous">
-                            <a href="/2016/07/22/eudemon/" data-toggle="tooltip" data-placement="top" title="Eudemon 监控框架介绍">&larr; Previous Post</a>
-                        </li>
                     
+                        <li class="next">
+                            <a href="/2016/07/22/eudemon/" data-toggle="tooltip" data-placement="top" title="Eudemon 监控框架介绍">Next Post &rarr;</a>
+                        </li>
                     
                 </ul>
 
@@ -238,9 +247,9 @@
                 <!-- 多说评论框 start -->
                 <div class="comment">
                     <div class="ds-thread"
-                        data-thread-key="2016/07/20/hello-world/"
-                        data-title="Hello World"
-                        data-url="http://spookyzn.github.io/2016/07/20/hello-world/" >
+                        data-thread-key="2016/08/14/docker-machine-internal-registry/"
+                        data-title="Mac osx下Docker-machine 配置internal registry"
+                        data-url="http://spookyzn.github.io/2016/08/14/docker-machine-internal-registry/" >
                     </div>
                 </div>
                 <!-- 多说评论框 end -->
@@ -252,7 +261,7 @@
 
             <div class="hidden-xs col-sm-3 toc-col" >
                 <div class="toc-wrap">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题"><span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决方案"><span class="toc-text">解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最佳实践"><span class="toc-text">最佳实践</span></a></li></ol>
                 </div>
             </div>
         </div>
@@ -273,6 +282,10 @@
                     <a href="/tags/">FEATURED TAGS</a>
                 </h5>
                     <div class="tags">
+                        
+                          <a class="tag" href="/tags/#docker" title="docker">docker</a>
+                        
+                          <a class="tag" href="/tags/#osx" title="osx">osx</a>
                         
                     </div>
                 </section>
